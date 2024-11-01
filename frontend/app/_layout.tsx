@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
+import axios from 'axios';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -22,12 +22,26 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    getAppConfig();
+  }, []);
+
+  const getAppConfig = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/enterprises-configuration');
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   if (!loaded) {
     return null;
   }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
