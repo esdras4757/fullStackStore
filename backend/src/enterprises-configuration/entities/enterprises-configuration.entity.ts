@@ -10,7 +10,10 @@ export class Enterprises extends Document {
     })
     enterpriseName: string;
 
-    @Prop()
+    @Prop({
+        required: true,
+        default: "https://placecats.com/300/200",
+    })
     logoUrl: string;
 
 

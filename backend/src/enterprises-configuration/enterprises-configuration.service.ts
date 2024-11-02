@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Enterprises } from './entities/enterprises-configuration.entity';
 import { Model } from 'mongoose';
 import { s3 } from '../aws/aws.config';
+import e from 'express';
 
 
 @Injectable()
@@ -17,10 +18,23 @@ export class EnterprisesConfigurationService {
 
   async create(file: Express.Multer.File,createEnterprisesConfigurationDto: CreateEnterprisesConfigurationDto) {
     try {
-      const logoUrl= await this.uploadFile(file, createEnterprisesConfigurationDto);
-      console.log(logoUrl);
-      // const response = await this.enterprisesModel.create(createEnterprisesConfigurationDto);
-      // return response;
+
+      const response = await this.enterprisesModel.create(createEnterprisesConfigurationDto);
+      if (response) {
+        const {_id} = response.toJSON();
+        const id = _id.toString();
+        const logoUrl= await this.uploadFile(file, createEnterprisesConfigurationDto, id);
+        let updatedResponse;
+        if (logoUrl) {
+          updatedResponse = await this.update(id, {logoUrl});
+        }
+        if (updatedResponse) {
+          return updatedResponse
+        };
+        throw new Error('Error creating enterprise');
+      }
+      throw new Error('Error creating enterprise');
+      
 
     } catch (error) {
       if (error.code === 11000) {
@@ -33,10 +47,7 @@ export class EnterprisesConfigurationService {
 
   async findAll() {
     try {
-      const buckets = await s3.listBuckets().promise();
-      console.log('Buckets disponibles:', buckets.Buckets);
-
-      const response = this.enterprisesModel.find();
+      const response = await this.enterprisesModel.find();
       return response;
     }
     catch (error) {
@@ -45,24 +56,40 @@ export class EnterprisesConfigurationService {
     }   
   }
 
-  findOne(id: number) {
-
-    return `This action returns a #${id} enterprisesConfiguration`;
+  findOne(id: string) {
+    try {
+      const response = this.enterprisesModel.findById(id);
+      if (response) {
+        return response;
+      }
+      else {
+        throw new BadRequestException('Enterprise not found');
+      }
+    } catch (error) {
+      throw new BadRequestException('Enterprise not found');
+    }
   }
 
-  update(id: number, updateEnterprisesConfigurationDto: UpdateEnterprisesConfigurationDto) {
-    return `This action updates a #${id} enterprisesConfiguration`;
+  async update(id: string, updateEnterprisesConfigurationDto: UpdateEnterprisesConfigurationDto) {
+    try {
+      const object = await this.findOne(id)
+      if (object) {
+        await object.updateOne(updateEnterprisesConfigurationDto, {new: true});
+        return {...object.toJSON(), ...updateEnterprisesConfigurationDto};
+      }
+    } catch (error) {
+      throw new BadRequestException('Enterprise not found');
+    }
   }
 
   remove(id: number) {
     return `This action removes a #${id} enterprisesConfiguration`;
   }
 
-  async uploadFile(file:Express.Multer.File, createEnterprisesConfigurationDto:CreateEnterprisesConfigurationDto): Promise<string> {
-    
+  async uploadFile(file:Express.Multer.File, createEnterprisesConfigurationDto:CreateEnterprisesConfigurationDto, id:string): Promise<string> {
     const params = {
       Bucket: 'ecommerce2112', // Nombre del bucket
-      Key: `${'images'}/${file.originalname}`, // Puedes usar un UUID para un nombre único
+      Key: `${id}/logo.png`,
       Body: file.buffer,
       ContentType: file.mimetype,
     };

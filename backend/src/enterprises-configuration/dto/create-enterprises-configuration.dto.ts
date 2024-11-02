@@ -1,10 +1,12 @@
-import { isMongoId, IsNotEmpty, Min, MinLength } from "class-validator";
+import { IsEnum, IsIn, isMongoId, IsNotEmpty, Min, MinLength } from "class-validator";
 
 export class CreateEnterprisesConfigurationDto {
     @MinLength(3)
     enterpriseName: string;
     logo: Express.Multer.File;
+    logoUrl: string;
     @MinLength(3)
+    @IsIn(["light", "dark"])
     defaultTheme: string;
     @MinLength(3)
     lightPrimaryColor: string;

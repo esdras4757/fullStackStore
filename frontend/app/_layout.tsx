@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import axios from 'axios';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import Constants from 'expo-constants';
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -19,6 +21,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
+
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -29,8 +32,8 @@ export default function RootLayout() {
 
   const getAppConfig = async () => {
     try {
-      const response = await axios.get('http://10.0.2.2:5001/enterprises-configuration');
-      console.log(response);
+      const {data} = await axios.get('http://192.168.1.90:5001/enterprises-configuration/'+Constants.expoConfig?.extra?.ENTERPRISE_ID);
+      console.log(data);
     } catch (error) {
       console.error(error);
     }

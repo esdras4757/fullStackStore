@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UsePipes } from '@nestjs/common';
 import { EnterprisesConfigurationService } from './enterprises-configuration.service';
 import { CreateEnterprisesConfigurationDto } from './dto/create-enterprises-configuration.dto';
 import { UpdateEnterprisesConfigurationDto } from './dto/update-enterprises-configuration.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ParseMongoIdPipe } from 'src/common/parse-mongo-id.pipe';
 
 @Controller('enterprises-configuration')
 export class EnterprisesConfigurationController {
@@ -23,12 +24,12 @@ export class EnterprisesConfigurationController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.enterprisesConfigurationService.findOne(+id);
+    return this.enterprisesConfigurationService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEnterprisesConfigurationDto: UpdateEnterprisesConfigurationDto) {
-    return this.enterprisesConfigurationService.update(+id, updateEnterprisesConfigurationDto);
+  update(@Param('id',ParseMongoIdPipe) id: string, @Body() updateEnterprisesConfigurationDto: UpdateEnterprisesConfigurationDto) {
+    return this.enterprisesConfigurationService.update(id, updateEnterprisesConfigurationDto);
   }
 
   @Delete(':id')
