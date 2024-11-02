@@ -9,7 +9,7 @@ export class EnterprisesConfigurationController {
   constructor(private readonly enterprisesConfigurationService: EnterprisesConfigurationService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('logo'))
   create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createEnterprisesConfigurationDto: CreateEnterprisesConfigurationDto) {

@@ -17,9 +17,10 @@ export class EnterprisesConfigurationService {
 
   async create(file: Express.Multer.File,createEnterprisesConfigurationDto: CreateEnterprisesConfigurationDto) {
     try {
-      const logoUrl=this.uploadFile(file, createEnterprisesConfigurationDto);
-      const response = await this.enterprisesModel.create(createEnterprisesConfigurationDto);
-      return response;
+      const logoUrl= await this.uploadFile(file, createEnterprisesConfigurationDto);
+      console.log(logoUrl);
+      // const response = await this.enterprisesModel.create(createEnterprisesConfigurationDto);
+      // return response;
 
     } catch (error) {
       if (error.code === 11000) {
@@ -58,9 +59,10 @@ export class EnterprisesConfigurationService {
   }
 
   async uploadFile(file:Express.Multer.File, createEnterprisesConfigurationDto:CreateEnterprisesConfigurationDto): Promise<string> {
+    
     const params = {
-      Bucket: createEnterprisesConfigurationDto.enterpriseName+'logo', // Nombre del bucket
-      Key: file.originalname, // Puedes usar un UUID para un nombre único
+      Bucket: 'ecommerce2112', // Nombre del bucket
+      Key: `${'images'}/${file.originalname}`, // Puedes usar un UUID para un nombre único
       Body: file.buffer,
       ContentType: file.mimetype,
     };
