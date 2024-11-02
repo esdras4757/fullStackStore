@@ -16,6 +16,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -28,7 +29,7 @@ export default function RootLayout() {
 
   const getAppConfig = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/enterprises-configuration');
+      const response = await axios.get('http://10.0.2.2:5001/enterprises-configuration');
       console.log(response);
     } catch (error) {
       console.error(error);

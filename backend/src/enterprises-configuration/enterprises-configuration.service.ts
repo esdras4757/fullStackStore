@@ -4,6 +4,8 @@ import { UpdateEnterprisesConfigurationDto } from './dto/update-enterprises-conf
 import { InjectModel } from '@nestjs/mongoose';
 import { Enterprises } from './entities/enterprises-configuration.entity';
 import { Model } from 'mongoose';
+import { s3 } from '../aws/aws.config';
+
 
 @Injectable()
 export class EnterprisesConfigurationService {
@@ -13,8 +15,9 @@ export class EnterprisesConfigurationService {
     private readonly enterprisesModel: Model<Enterprises>
   ) {} 
 
-  async create(createEnterprisesConfigurationDto: CreateEnterprisesConfigurationDto) {
+  async create(file: Express.Multer.File,createEnterprisesConfigurationDto: CreateEnterprisesConfigurationDto) {
     try {
+      const logoUrl=this.uploadFile(file, createEnterprisesConfigurationDto);
       const response = await this.enterprisesModel.create(createEnterprisesConfigurationDto);
       return response;
 
@@ -27,12 +30,16 @@ export class EnterprisesConfigurationService {
     }
   }
 
-  findAll() {
+  async findAll() {
     try {
+      const buckets = await s3.listBuckets().promise();
+      console.log('Buckets disponibles:', buckets.Buckets);
+
       const response = this.enterprisesModel.find();
       return response;
     }
     catch (error) {
+      console.log(error);
       return new NotAcceptableException('Error getting enterprises');
     }   
   }
@@ -48,5 +55,17 @@ export class EnterprisesConfigurationService {
 
   remove(id: number) {
     return `This action removes a #${id} enterprisesConfiguration`;
+  }
+
+  async uploadFile(file:Express.Multer.File, createEnterprisesConfigurationDto:CreateEnterprisesConfigurationDto): Promise<string> {
+    const params = {
+      Bucket: createEnterprisesConfigurationDto.enterpriseName+'logo', // Nombre del bucket
+      Key: file.originalname, // Puedes usar un UUID para un nombre único
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+
+    const { Location } = await s3.upload(params).promise();
+    return Location; // Retorna la URL del archivo subido
   }
 }

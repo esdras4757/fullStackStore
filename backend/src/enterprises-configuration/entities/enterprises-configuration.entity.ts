@@ -13,6 +13,7 @@ export class Enterprises extends Document {
     @Prop()
     logoUrl: string;
 
+
     @Prop()
     country: string;
 
